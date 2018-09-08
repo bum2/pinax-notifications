@@ -50,7 +50,7 @@ class PinaxNotificationsAppConf(AppConf):
     QUEUE_ALL = False
     HOOKSET = "pinax.notifications.hooks.DefaultHookSet"
     BACKENDS = [
-        ("email", "pinax.notifications.backends.email.EmailBackend"),
+        ("email", "pinax.notifications.backends.pemail.EmailBackend"),
     ]
 
     def configure_backends(self, value):
