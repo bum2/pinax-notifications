@@ -1,7 +1,10 @@
 from django.conf import settings
-from django.core.mail import send_mail
+#from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+import smtplib
 
 from .base import BaseBackend
 
@@ -41,4 +44,22 @@ class EmailBackend(BaseBackend):
         })
         body = render_to_string("pinax/notifications/email_body.txt", context)
 
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient.email])
+        if sender.email:
+            fromaddr = sender.email
+        else:
+            fromaddr = settings.DEFAULT_FROM_EMAIL
+        toaddr = recipient.email
+        
+        msg = MIMEMultipart()
+        msg['From'] = fromaddr
+        msg['To'] = toaddr
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+        server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        text = msg.as_string()
+        server.sendmail(fromaddr, toaddr, text)
+        #send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient.email])
